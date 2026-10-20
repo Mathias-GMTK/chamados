@@ -17,6 +17,7 @@ public class CategoriaService {
     private final ChamadoRepository chamadoRepository;
     private final CategoriaRepository repository;
 
+
     public CategoriaService(ChamadoRepository chamadoRepository, CategoriaRepository repository) {
         this.chamadoRepository = chamadoRepository;
         this.repository = repository;

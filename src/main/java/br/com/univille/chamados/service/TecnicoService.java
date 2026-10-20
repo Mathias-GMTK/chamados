@@ -6,6 +6,7 @@ import br.com.univille.chamados.entity.Tecnico;
 import br.com.univille.chamados.exception.RecursoNaoEncontradoException;
 import br.com.univille.chamados.exception.RegraNegocioException;
 import br.com.univille.chamados.repository.TecnicoRepository;
+import br.com.univille.chamados.repository.ChamadoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,9 +15,11 @@ import java.util.List;
 public class TecnicoService {
 
     private final TecnicoRepository repository;
+    private final ChamadoRepository chamadoRepository;
 
-    public TecnicoService(TecnicoRepository repository) {
+    public TecnicoService(TecnicoRepository repository, ChamadoRepository chamadoRepository) {
         this.repository = repository;
+        this.chamadoRepository = chamadoRepository;
     }
 
     public List<TecnicoResponse> listar() {
@@ -46,7 +49,13 @@ public class TecnicoService {
     }
 
     public void deletar(Long id) {
-        repository.delete(buscarEntity(id));
+        Tecnico tecnico = buscarEntity(id);
+        if (ChamadoRepository.existsByTecnicoId(id)) {
+                throw new RegraNegocioException(
+                        "Não é possível excluir a categoria, pois há chamados vinculados a ela");
+            }
+        }
+        repository.delete(Tecnico);
     }
 
     private void preencher(Tecnico tecnico, TecnicoRequest request) {

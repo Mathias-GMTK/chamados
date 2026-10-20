@@ -42,7 +42,6 @@ public class ChamadoService {
     public ChamadoResponse criar(ChamadoRequest request) {
         Chamado chamado = new Chamado();
         preencher(chamado, request);
-        // Regra: chamado nasce ABERTO e a data de abertura é automática
         chamado.setStatus(StatusChamado.ABERTO);
         chamado.setDataAbertura(LocalDateTime.now());
         return toResponse(chamadoRepository.save(chamado));
