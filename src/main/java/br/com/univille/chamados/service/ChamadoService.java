@@ -2,7 +2,9 @@ package br.com.univille.chamados.service;
 
 import br.com.univille.chamados.dto.ChamadoRequest;
 import br.com.univille.chamados.dto.ChamadoResponse;
-import br.com.univille.chamados.entity.*;
+import br.com.univille.chamados.entity.Chamado;
+import br.com.univille.chamados.entity.StatusChamado;
+import br.com.univille.chamados.entity.Tecnico;
 import br.com.univille.chamados.exception.RecursoNaoEncontradoException;
 import br.com.univille.chamados.exception.RegraNegocioException;
 import br.com.univille.chamados.repository.CategoriaRepository;
@@ -43,33 +45,60 @@ public class ChamadoService {
     public ChamadoResponse criar(ChamadoRequest request) {
         Chamado chamado = new Chamado();
         preencher(chamado, request);
+        chamado.setTecnico(buscarTecnico(request.tecnicoId())); // null é permitido na criação
         chamado.setStatus(StatusChamado.ABERTO);
         chamado.setDataAbertura(LocalDateTime.now());
         return toResponse(chamadoRepository.save(chamado));
     }
 
-   public ChamadoResponse atualizar(Long id, ChamadoRequest request) {
-    Chamado chamado = buscarEntity(id);
-
-    if (request.status() != null && !chamado.getStatus().podeIrPara(request.status())) {
-        throw new RegraNegocioException(
-            "Mudança de status inválida: de " + chamado.getStatus()
-            + " para " + request.status());
+    public ChamadoResponse atualizar(Long id, ChamadoRequest request) {
+        Chamado chamado = buscarEntity(id);
+        garantirNaoFechado(chamado);
+        preencher(chamado, request); // não altera status nem técnico
+        return toResponse(chamadoRepository.save(chamado));
     }
 
-    preencher(chamado, request);
+    public ChamadoResponse atribuir(Long id, Long tecnicoId) {
+        Chamado chamado = buscarEntity(id);
+        if (chamado.getStatus() == StatusChamado.FECHADO) {
+            throw new RegraNegocioException("Não é possível atribuir técnico a um chamado fechado");
+        }
+        chamado.setTecnico(buscarTecnico(tecnicoId));
+        return toResponse(chamadoRepository.save(chamado));
+    }
 
-    if (request.status() != null && request.status() != chamado.getStatus()) {
-        chamado.setStatus(request.status());
-        if (request.status() == StatusChamado.FECHADO) {
+    public ChamadoResponse alterarStatus(Long id, StatusChamado novo) {
+        Chamado chamado = buscarEntity(id);
+        garantirNaoFechado(chamado);
+
+        StatusChamado atual = chamado.getStatus();
+        if (!atual.podeIrPara(novo)) {
+            throw new RegraNegocioException(
+                    "Mudança de status inválida: de " + atual + " para " + novo);
+        }
+        if (novo == StatusChamado.FECHADO) {
             chamado.setDataFechamento(LocalDateTime.now());
         }
+        chamado.setStatus(novo);
+        return toResponse(chamadoRepository.save(chamado));
     }
-    return toResponse(chamadoRepository.save(chamado));
-}
 
     public void deletar(Long id) {
         chamadoRepository.delete(buscarEntity(id));
+    }
+
+    private void garantirNaoFechado(Chamado chamado) {
+        if (chamado.getStatus() == StatusChamado.FECHADO) {
+            throw new RegraNegocioException("Chamado fechado não pode ser alterado");
+        }
+    }
+
+    private Tecnico buscarTecnico(Long tecnicoId) {
+        if (tecnicoId == null) {
+            return null;
+        }
+        return tecnicoRepository.findById(tecnicoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Técnico não encontrado: " + tecnicoId));
     }
 
     private void preencher(Chamado chamado, ChamadoRequest request) {
@@ -82,13 +111,6 @@ public class ChamadoService {
 
         chamado.setCategoria(categoriaRepository.findById(request.categoriaId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada: " + request.categoriaId())));
-
-        if (request.tecnicoId() != null) {
-            chamado.setTecnico(tecnicoRepository.findById(request.tecnicoId())
-                    .orElseThrow(() -> new RecursoNaoEncontradoException("Técnico não encontrado: " + request.tecnicoId())));
-        } else {
-            chamado.setTecnico(null);
-        }
     }
 
     private Chamado buscarEntity(Long id) {
