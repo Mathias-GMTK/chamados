@@ -1,5 +1,7 @@
 package br.com.univille.chamados.controller;
 
+import br.com.univille.chamados.dto.AlterarStatusRequest;
+import br.com.univille.chamados.dto.AtribuirTecnicoRequest;
 import br.com.univille.chamados.dto.ChamadoRequest;
 import br.com.univille.chamados.dto.ChamadoResponse;
 import br.com.univille.chamados.service.ChamadoService;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/chamados")
@@ -40,6 +43,15 @@ public class ChamadoController {
         return service.atualizar(id, request);
     }
 
+    @PatchMapping("/{id}/atribuir")
+    public ChamadoResponse atribuir(@PathVariable Long id,@Valid @RequestBody AtribuirTecnicoRequest request) {
+        return service.atribuir(id, request.tecnicoId());
+    }
+
+    @PatchMapping("/{id}/status")
+    public ChamadoResponse alterarStatus(@PathVariable Long id,@Valid @RequestBody AlterarStatusRequest request) {
+        return service.alterarStatus(id, request.status());
+}       
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.deletar(id);
