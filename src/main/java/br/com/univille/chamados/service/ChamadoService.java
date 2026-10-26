@@ -4,6 +4,7 @@ import br.com.univille.chamados.dto.ChamadoRequest;
 import br.com.univille.chamados.dto.ChamadoResponse;
 import br.com.univille.chamados.entity.*;
 import br.com.univille.chamados.exception.RecursoNaoEncontradoException;
+import br.com.univille.chamados.exception.RegraNegocioException;
 import br.com.univille.chamados.repository.CategoriaRepository;
 import br.com.univille.chamados.repository.ChamadoRepository;
 import br.com.univille.chamados.repository.ClienteRepository;
@@ -47,20 +48,25 @@ public class ChamadoService {
         return toResponse(chamadoRepository.save(chamado));
     }
 
-    public ChamadoResponse atualizar(Long id, ChamadoRequest request) {
-        Chamado chamado = buscarEntity(id);
-        preencher(chamado, request);
+   public ChamadoResponse atualizar(Long id, ChamadoRequest request) {
+    Chamado chamado = buscarEntity(id);
 
-        if (request.status() != null) {
-            chamado.setStatus(request.status());
-            if (request.status() == StatusChamado.FECHADO) {
-                chamado.setDataFechamento(LocalDateTime.now());
-            } else {
-                chamado.setDataFechamento(null);
-            }
-        }
-        return toResponse(chamadoRepository.save(chamado));
+    if (request.status() != null && !chamado.getStatus().podeIrPara(request.status())) {
+        throw new RegraNegocioException(
+            "Mudança de status inválida: de " + chamado.getStatus()
+            + " para " + request.status());
     }
+
+    preencher(chamado, request);
+
+    if (request.status() != null && request.status() != chamado.getStatus()) {
+        chamado.setStatus(request.status());
+        if (request.status() == StatusChamado.FECHADO) {
+            chamado.setDataFechamento(LocalDateTime.now());
+        }
+    }
+    return toResponse(chamadoRepository.save(chamado));
+}
 
     public void deletar(Long id) {
         chamadoRepository.delete(buscarEntity(id));

@@ -48,15 +48,14 @@ public class TecnicoService {
         return toResponse(repository.save(tecnico));
     }
 
-    public void deletar(Long id) {
-        Tecnico tecnico = buscarEntity(id);
-        if (ChamadoRepository.existsByTecnicoId(id)) {
-                throw new RegraNegocioException(
-                        "Não é possível excluir a categoria, pois há chamados vinculados a ela");
-            }
-        }
-        repository.delete(Tecnico);
+   public void deletar(Long id) {
+    Tecnico tecnico = buscarEntity(id);
+    if (chamadoRepository.existsByTecnicoId(id)) {
+        throw new RegraNegocioException(
+            "Não é possível excluir o técnico, pois há chamados vinculados a ele");
     }
+    repository.delete(tecnico);
+}
 
     private void preencher(Tecnico tecnico, TecnicoRequest request) {
         tecnico.setNome(request.nome());
