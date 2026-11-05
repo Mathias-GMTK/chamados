@@ -3,18 +3,17 @@ package br.com.univille.chamados.controller;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import br.com.univille.chamados.dto.ChamadoResponse;
 import br.com.univille.chamados.dto.ClienteRequest;
 import br.com.univille.chamados.dto.ClienteResponse;
+import br.com.univille.chamados.service.ChamadoService;
 import br.com.univille.chamados.service.ClienteService;
 import jakarta.validation.Valid;
 
@@ -23,14 +22,15 @@ import jakarta.validation.Valid;
 public class ClienteController {
 
     private final ClienteService service;
+    private final ChamadoService chamadoService;
 
-    public ClienteController(ClienteService service) {
+    public ClienteController(ClienteService service, ChamadoService chamadoService) {
         this.service = service;
+        this.chamadoService = chamadoService;
     }
 
     @PostMapping
-    public ResponseEntity<ClienteResponse> criar(
-            @Valid @RequestBody ClienteRequest dto) {
+    public ResponseEntity<ClienteResponse> criar(@Valid @RequestBody ClienteRequest dto) {
         ClienteResponse criado = service.criar(dto);
         return ResponseEntity.created(URI.create("/clientes/" + criado.id())).body(criado);
     }
@@ -45,10 +45,17 @@ public class ClienteController {
         return service.buscar(id);
     }
 
-    @PutMapping("/{id}")
-    public ClienteResponse atualizar(
+    @GetMapping("/{id}/chamados")
+    public PagedModel<ChamadoResponse> listarChamados(
             @PathVariable Long id,
-            @Valid @RequestBody ClienteRequest dto) {
+            @PageableDefault(size = 10, sort = "dataAbertura", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        return new PagedModel<>(chamadoService.listarPorCliente(id, pageable));
+    }
+
+    @PutMapping("/{id}")
+    public ClienteResponse atualizar(@PathVariable Long id,
+                                     @Valid @RequestBody ClienteRequest dto) {
         return service.atualizar(id, dto);
     }
 
