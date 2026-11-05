@@ -3,9 +3,6 @@ package br.com.univille.chamados.exception;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import br.com.univille.chamados.exception.ErroResposta;
-import br.com.univille.chamados.exception.RecursoNaoEncontradoException;
-import br.com.univille.chamados.exception.RegraNegocioException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
