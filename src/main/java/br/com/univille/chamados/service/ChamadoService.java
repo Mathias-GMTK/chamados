@@ -1,17 +1,14 @@
 package br.com.univille.chamados.service;
 
-import br.com.univille.chamados.dto.ChamadoRequest;
-import br.com.univille.chamados.dto.ChamadoResponse;
-import br.com.univille.chamados.entity.Chamado;
-import br.com.univille.chamados.entity.StatusChamado;
-import br.com.univille.chamados.entity.Tecnico;
+import br.com.univille.chamados.dto.*;
+import br.com.univille.chamados.entity.*;
 import br.com.univille.chamados.exception.RecursoNaoEncontradoException;
 import br.com.univille.chamados.exception.RegraNegocioException;
-import br.com.univille.chamados.repository.CategoriaRepository;
-import br.com.univille.chamados.repository.ChamadoRepository;
-import br.com.univille.chamados.repository.ClienteRepository;
-import br.com.univille.chamados.repository.TecnicoRepository;
+import br.com.univille.chamados.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,29 +20,52 @@ public class ChamadoService {
     private final ClienteRepository clienteRepository;
     private final CategoriaRepository categoriaRepository;
     private final TecnicoRepository tecnicoRepository;
+    private final ComentarioRepository comentarioRepository;
 
     public ChamadoService(ChamadoRepository chamadoRepository,
                           ClienteRepository clienteRepository,
                           CategoriaRepository categoriaRepository,
-                          TecnicoRepository tecnicoRepository) {
+                          TecnicoRepository tecnicoRepository,
+                          ComentarioRepository comentarioRepository) {
         this.chamadoRepository = chamadoRepository;
         this.clienteRepository = clienteRepository;
         this.categoriaRepository = categoriaRepository;
         this.tecnicoRepository = tecnicoRepository;
+        this.comentarioRepository = comentarioRepository;
     }
 
-    public List<ChamadoResponse> listar() {
-        return chamadoRepository.findAll().stream().map(this::toResponse).toList();
+    public Page<ChamadoResponse> listar(StatusChamado status, Prioridade prioridade,
+                                        Long clienteId, Pageable pageable) {
+        return chamadoRepository
+                .findAll(ChamadoSpecs.comFiltros(status, prioridade, clienteId), pageable)
+                .map(this::toResponse);
     }
 
-    public ChamadoResponse buscarPorId(Long id) {
-        return toResponse(buscarEntity(id));
+    public Page<ChamadoResponse> listarPorCliente(Long clienteId, Pageable pageable) {
+        if (!clienteRepository.existsById(clienteId)) {
+            throw new RecursoNaoEncontradoException("Cliente não encontrado: " + clienteId);
+        }
+        return listar(null, null, clienteId, pageable);
+    }
+
+    public ChamadoDetalheResponse buscarDetalhe(Long id) {
+        Chamado c = buscarEntity(id);
+        List<ComentarioResponse> comentarios = comentarioRepository
+                .findByChamadoIdOrderByDataAsc(id).stream()
+                .map(this::toComentarioResponse).toList();
+        return new ChamadoDetalheResponse(
+                c.getId(), c.getTitulo(), c.getDescricao(),
+                c.getDataAbertura(), c.getDataFechamento(),
+                c.getPrioridade(), c.getStatus(),
+                c.getCliente().getId(), c.getCategoria().getId(),
+                c.getTecnico() != null ? c.getTecnico().getId() : null,
+                comentarios);
     }
 
     public ChamadoResponse criar(ChamadoRequest request) {
         Chamado chamado = new Chamado();
         preencher(chamado, request);
-        chamado.setTecnico(buscarTecnico(request.tecnicoId())); // null é permitido na criação
+        chamado.setTecnico(buscarTecnico(request.tecnicoId()));
         chamado.setStatus(StatusChamado.ABERTO);
         chamado.setDataAbertura(LocalDateTime.now());
         return toResponse(chamadoRepository.save(chamado));
@@ -54,7 +74,7 @@ public class ChamadoService {
     public ChamadoResponse atualizar(Long id, ChamadoRequest request) {
         Chamado chamado = buscarEntity(id);
         garantirNaoFechado(chamado);
-        preencher(chamado, request); // não altera status nem técnico
+        preencher(chamado, request);
         return toResponse(chamadoRepository.save(chamado));
     }
 
@@ -83,8 +103,21 @@ public class ChamadoService {
         return toResponse(chamadoRepository.save(chamado));
     }
 
+    public ComentarioResponse adicionarComentario(Long chamadoId, ComentarioRequest request) {
+        Chamado chamado = buscarEntity(chamadoId);
+        Comentario comentario = new Comentario();
+        comentario.setTexto(request.texto());
+        comentario.setAutor(request.autor());
+        comentario.setData(LocalDateTime.now());
+        comentario.setChamado(chamado);
+        return toComentarioResponse(comentarioRepository.save(comentario));
+    }
+
+    @Transactional
     public void deletar(Long id) {
-        chamadoRepository.delete(buscarEntity(id));
+        Chamado chamado = buscarEntity(id);
+        comentarioRepository.deleteByChamadoId(id);
+        chamadoRepository.delete(chamado);
     }
 
     private void garantirNaoFechado(Chamado chamado) {
@@ -120,16 +153,14 @@ public class ChamadoService {
 
     private ChamadoResponse toResponse(Chamado c) {
         return new ChamadoResponse(
-                c.getId(),
-                c.getTitulo(),
-                c.getDescricao(),
-                c.getDataAbertura(),
-                c.getDataFechamento(),
-                c.getPrioridade(),
-                c.getStatus(),
-                c.getCliente().getId(),
-                c.getCategoria().getId(),
-                c.getTecnico() != null ? c.getTecnico().getId() : null
-        );
+                c.getId(), c.getTitulo(), c.getDescricao(),
+                c.getDataAbertura(), c.getDataFechamento(),
+                c.getPrioridade(), c.getStatus(),
+                c.getCliente().getId(), c.getCategoria().getId(),
+                c.getTecnico() != null ? c.getTecnico().getId() : null);
+    }
+
+    private ComentarioResponse toComentarioResponse(Comentario c) {
+        return new ComentarioResponse(c.getId(), c.getTexto(), c.getAutor(), c.getData());
     }
 }
