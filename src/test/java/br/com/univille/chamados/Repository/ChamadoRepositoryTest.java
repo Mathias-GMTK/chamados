@@ -1,6 +1,10 @@
-package br.com.univille.chamados.repository;
+package br.com.univille.chamados.Repository;
 
 import br.com.univille.chamados.entity.*;
+import br.com.univille.chamados.repository.CategoriaRepository;
+import br.com.univille.chamados.repository.ChamadoRepository;
+import br.com.univille.chamados.repository.ChamadoSpecs;
+import br.com.univille.chamados.repository.ClienteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 class ChamadoRepositoryTest {
 
-    @Autowired ChamadoRepository chamadoRepository;
-    @Autowired ClienteRepository clienteRepository;
-    @Autowired CategoriaRepository categoriaRepository;
+    @Autowired
+    ChamadoRepository chamadoRepository;
+    @Autowired
+    ClienteRepository clienteRepository;
+    @Autowired
+    CategoriaRepository categoriaRepository;
 
     private Cliente cliente;
     private Categoria categoria;

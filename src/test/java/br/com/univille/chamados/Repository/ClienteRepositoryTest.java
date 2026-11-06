@@ -1,6 +1,7 @@
-package br.com.univille.chamados.repository;
+package br.com.univille.chamados.Repository;
 
 import br.com.univille.chamados.entity.Cliente;
+import br.com.univille.chamados.repository.ClienteRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -12,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DataJpaTest
 class ClienteRepositoryTest {
 
-    @Autowired ClienteRepository repository;
+    @Autowired
+    ClienteRepository repository;
 
     @Test
     void encontraEmailExistente() {
