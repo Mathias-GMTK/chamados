@@ -1,8 +1,9 @@
 package br.com.univille.chamados.entity;
 
-public enum StatusChamado {
-    ABERTO, EM_ATENDIMENTO, AGUARDANDO_CLIENTE, FECHADO
+import java.util.Set;
 
+public enum StatusChamado {
+    ABERTO, EM_ATENDIMENTO, AGUARDANDO_CLIENTE, FECHADO;
 
     public Set<StatusChamado> proximosPermitidos() {
         return switch (this) {
