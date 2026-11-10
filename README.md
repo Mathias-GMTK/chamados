@@ -11,25 +11,38 @@ API REST em Java 21 + Spring Boot para gerenciar chamados de suporte técnico
 
 No Windows: `mvnw.cmd spring-boot:run`
 
-## Interface (Swagger UI)
+## Front-end
 
-Com a aplicação rodando, abra **http://localhost:8080** — a raiz redireciona para o Swagger UI
-(`/swagger-ui.html`). Por ali dá para ver e testar todos os endpoints: clique no endpoint,
-em **Try it out**, ajuste o JSON de exemplo e clique em **Execute**.
+Com a aplicação rodando, abra **http://localhost:8080**. O front-end é servido pelo próprio
+Spring Boot (arquivos em `src/main/resources/static`) e consome a API REST com `fetch`,
+seguindo os contratos documentados no Swagger.
 
-Ordem sugerida para testar:
+Telas disponíveis:
 
-1. `POST /clientes` — cadastrar um cliente
-2. `POST /categorias` — cadastrar uma categoria
-3. `POST /tecnicos` — cadastrar um técnico
-4. `POST /chamados` — abrir um chamado com os IDs criados
-5. `PATCH /chamados/{id}/atribuir`, `PATCH /chamados/{id}/status` e `POST /chamados/{id}/comentarios`
+- **Chamados**: lista paginada com total por status (clique para filtrar), filtros por
+  prioridade e cliente, abertura de chamado e tela de detalhe com mudança de status,
+  atribuição de técnico, comentários, edição e exclusão
+- **Clientes**, **Categorias** e **Técnicos**: cadastro, edição e exclusão
 
-Outros endereços úteis:
+Ordem para começar a usar: cadastre um cliente, uma categoria e um técnico, depois abra um chamado.
+
+Estrutura do front-end:
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `static/index.html` | Estrutura da página e menu |
+| `static/css/app.css` | Estilos |
+| `static/js/api.js` | Todas as chamadas à API REST |
+| `static/js/ui.js` | Utilitários de interface (modal, avisos, rótulos) |
+| `static/js/cadastros.js` | Telas de clientes, categorias e técnicos |
+| `static/js/chamados.js` | Lista, detalhe e atendimento de chamados |
+| `static/js/app.js` | Navegação entre as telas |
+
+## Documentação da API (Swagger)
 
 | Recurso | URL |
 |---|---|
-| Swagger UI | http://localhost:8080/swagger-ui.html |
+| Swagger UI | http://localhost:8080/swagger-ui.html (também no link do menu lateral) |
 | Especificação OpenAPI (JSON) | http://localhost:8080/v3/api-docs |
 | Console do H2 | http://localhost:8080/h2-console (JDBC URL `jdbc:h2:mem:chamadosdb`, usuário `sa`) |
 
