@@ -23,7 +23,7 @@ public record ChamadoRequest(
         @Schema(example = "ALTA")
         Prioridade prioridade,
 
-        @Schema(description = "Opcional. Na criação o chamado começa como ABERTO", example = "ABERTO")
+        @Schema(description = "Ignorado: todo chamado abre como ABERTO. Para mudar, use PATCH /chamados/{id}/status", example = "ABERTO")
         StatusChamado status,
 
         @NotNull(message = "O cliente é obrigatório")
@@ -34,6 +34,6 @@ public record ChamadoRequest(
         @Schema(example = "1")
         Long categoriaId,
 
-        @Schema(description = "Opcional", example = "1")
+        @Schema(description = "Opcional, usado só na abertura. Depois, use PATCH /chamados/{id}/atribuir", example = "1")
         Long tecnicoId
 ) {}
