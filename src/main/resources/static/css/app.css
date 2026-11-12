@@ -1,28 +1,29 @@
 :root {
-  --bg: #eef1f5;
+  --bg: #f2f5f4;
   --surface: #ffffff;
-  --ink: #1c2433;
-  --muted: #5e6a7d;
-  --line: #d8dee7;
-  --line-strong: #b9c2d0;
-  --accent: #2f5bea;
+  --ink: #1b2b2a;
+  --muted: #5a6b69;
+  --line: #d6e0de;
+  --line-strong: #b5c5c2;
+  --accent: #0e7c72;
   --accent-ink: #ffffff;
-  --accent-soft: #e4ebfd;
+  --accent-hover: #0a635b;
+  --accent-soft: #daefec;
   --danger: #c8312b;
   --danger-soft: #fbe7e6;
 
-  --st-aberto: #2f5bea;
-  --st-em-atendimento: #c77700;
-  --st-aguardando-cliente: #7a4fd1;
-  --st-fechado: #3f8f5b;
+  --st-aberto: #2b6fd1;
+  --st-em-atendimento: #d97f1e;
+  --st-aguardando-cliente: #9150c4;
+  --st-fechado: #64798a;
 
   --pr-baixa: #7b8698;
   --pr-media: #3d6aa8;
   --pr-alta: #d06a12;
   --pr-critica: #c8312b;
 
-  --sidebar: #1c2433;
-  --sidebar-ink: #c9d1de;
+  --sidebar: #12393b;
+  --sidebar-ink: #c3d8d5;
 
   --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-cond: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
@@ -66,12 +67,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
   padding: 0 8px;
 }
 .brand-mark {
-  width: 28px; height: 28px; border-radius: 7px; flex: none;
-  background:
-    linear-gradient(90deg,
-      var(--st-aberto) 0 25%, var(--st-em-atendimento) 25% 50%,
-      var(--st-aguardando-cliente) 50% 75%, var(--st-fechado) 75% 100%);
+  width: 34px; height: 34px; border-radius: 9px; flex: none;
+  display: grid; place-items: center;
+  background: var(--accent); color: #fff;
 }
+.brand-mark svg { width: 24px; height: 24px; }
 .nav { display: flex; flex-direction: column; gap: 2px; }
 .nav a {
   color: var(--sidebar-ink); text-decoration: none;
@@ -111,7 +111,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn:hover { border-color: var(--muted); }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn-primary:hover { background: #2449c4; border-color: #2449c4; }
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 .btn-danger { color: var(--danger); border-color: #e6b6b3; }
 .btn-danger:hover { background: var(--danger-soft); border-color: var(--danger); }
 .btn-link {
@@ -163,10 +163,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); outline
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
-th { font-size: 13px; font-weight: 500; color: var(--muted); background: #f7f9fb; white-space: nowrap; }
+th { font-size: 13px; font-weight: 500; color: var(--muted); background: #f6f9f8; white-space: nowrap; }
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr.clickable { cursor: pointer; }
-tbody tr.clickable:hover { background: #f5f7fb; }
+tbody tr.clickable:hover { background: #f1f7f6; }
 td.num { color: var(--muted); font-variant-numeric: tabular-nums; width: 1%; white-space: nowrap; }
 td.actions { text-align: right; white-space: nowrap; width: 1%; }
 .cell-title { font-weight: 500; }
@@ -226,9 +226,9 @@ td.actions { text-align: right; white-space: nowrap; width: 1%; }
 .modal {
   border: 0; border-radius: var(--r-md); padding: 0;
   width: min(520px, calc(100vw - 32px));
-  box-shadow: 0 24px 60px rgba(28, 36, 51, .28);
+  box-shadow: 0 24px 60px rgba(18, 57, 59, .28);
 }
-.modal::backdrop { background: rgba(28, 36, 51, .45); }
+.modal::backdrop { background: rgba(18, 57, 59, .45); }
 .modal[open] { animation: rise .18s ease-out; }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
 .form { padding: 24px; display: grid; gap: 14px; }
@@ -248,7 +248,7 @@ td.actions { text-align: right; white-space: nowrap; width: 1%; }
 .toasts { position: fixed; right: 20px; bottom: 20px; display: grid; gap: 8px; z-index: 50; }
 .toast {
   background: var(--ink); color: #fff; padding: 11px 16px; border-radius: var(--r-sm);
-  font-size: 14px; max-width: 360px; box-shadow: 0 8px 24px rgba(28,36,51,.25);
+  font-size: 14px; max-width: 360px; box-shadow: 0 8px 24px rgba(18,57,59,.25);
   animation: rise .18s ease-out;
 }
 .toast.error { background: var(--danger); }
